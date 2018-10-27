@@ -938,6 +938,9 @@ var formatInputBytes = function (value) {
  */
 var formatInputDynamicBytes = function (value) {
     var result = utils.toHex(value).substr(2);
+    if (result.length % 2 !== 0) {
+        result = "0" + result;
+    }
     var length = result.length / 2;
     var l = Math.floor((result.length + 63) / 64);
     result = utils.padRight(result, l * 64);
@@ -1826,7 +1829,7 @@ module.exports = function (value, options) {
 };
 
 
-},{"crypto-js":65,"crypto-js/sha3":86}],20:[function(require,module,exports){
+},{"crypto-js":67,"crypto-js/sha3":88}],20:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -2231,7 +2234,7 @@ var toTwosComplement = function (number) {
  * @return {Boolean}
 */
 var isStrictAddress = function (address) {
-    return /^0x[0-9a-f]{40}$/i.test(address);
+    return /^0x[0-9a-f]{48}$/i.test(address);
 };
 
 /**
@@ -2329,8 +2332,7 @@ var toAddress = function (address) {
  * @return {Boolean}
  */
 var isBigNumber = function (object) {
-    return object instanceof BigNumber ||
-        (object && object.constructor && object.constructor.name === 'BigNumber');
+    return (object && (object instanceof BigNumber || (object.constructor && object.constructor.name === 'BigNumber')));
 };
 
 /**
@@ -2469,7 +2471,7 @@ module.exports = {
     isTopic: isTopic,
 };
 
-},{"./sha3.js":19,"bignumber.js":"bignumber.js","utf8":123}],21:[function(require,module,exports){
+},{"./sha3.js":19,"bignumber.js":"bignumber.js","utf8":125}],21:[function(require,module,exports){
 module.exports={
     "version": "0.20.7"
 }
@@ -2484,17 +2486,17 @@ module.exports={
 
 /*
  * This file is part of web3.js.
- * 
+ *
  * web3.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * web3.js is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -2516,6 +2518,7 @@ var Shh = require('./web3/methods/shh');
 var Net = require('./web3/methods/net');
 var Personal = require('./web3/methods/personal');
 var Swarm = require('./web3/methods/swarm');
+var Debug = require('./web3/methods/debug');
 var Settings = require('./web3/settings');
 var version = require('./version.json');
 var utils = require('./utils/utils');
@@ -2526,6 +2529,7 @@ var Property = require('./web3/property');
 var HttpProvider = require('./web3/httpprovider');
 var IpcProvider = require('./web3/ipcprovider');
 var BigNumber = require('bignumber.js');
+var Qkc = require('./web3/methods/qkc');
 
 
 
@@ -2537,6 +2541,7 @@ function Web3 (provider) {
     this.shh = new Shh(this);
     this.net = new Net(this);
     this.personal = new Personal(this);
+    this.debug = new Debug(this);
     this.bzz = new Swarm(this);
     this.settings = new Settings();
     this.version = {
@@ -2550,6 +2555,7 @@ function Web3 (provider) {
     this._extend({
         properties: properties()
     });
+    this.qkc = new Qkc(this);
 }
 
 // expose providers on the class
@@ -2633,8 +2639,7 @@ Web3.prototype.createBatch = function () {
 
 module.exports = Web3;
 
-
-},{"./utils/sha3":19,"./utils/utils":20,"./version.json":21,"./web3/batch":24,"./web3/extend":28,"./web3/httpprovider":32,"./web3/iban":33,"./web3/ipcprovider":34,"./web3/methods/db":37,"./web3/methods/eth":38,"./web3/methods/net":39,"./web3/methods/personal":40,"./web3/methods/shh":41,"./web3/methods/swarm":42,"./web3/property":45,"./web3/requestmanager":46,"./web3/settings":47,"bignumber.js":"bignumber.js"}],23:[function(require,module,exports){
+},{"./utils/sha3":19,"./utils/utils":20,"./version.json":21,"./web3/batch":24,"./web3/extend":28,"./web3/httpprovider":32,"./web3/iban":33,"./web3/ipcprovider":34,"./web3/methods/db":37,"./web3/methods/debug":38,"./web3/methods/eth":39,"./web3/methods/net":40,"./web3/methods/personal":41,"./web3/methods/qkc":42,"./web3/methods/shh":43,"./web3/methods/swarm":44,"./web3/property":47,"./web3/requestmanager":48,"./web3/settings":49,"bignumber.js":"bignumber.js"}],23:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -2723,7 +2728,7 @@ AllSolidityEvents.prototype.attachToContract = function (contract) {
 module.exports = AllSolidityEvents;
 
 
-},{"../utils/sha3":19,"../utils/utils":20,"./event":27,"./filter":29,"./formatters":30,"./methods/watches":43}],24:[function(require,module,exports){
+},{"../utils/sha3":19,"../utils/utils":20,"./event":27,"./filter":29,"./formatters":30,"./methods/watches":45}],24:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -3144,7 +3149,7 @@ module.exports = {
         return new Error(message);
     },
     ConnectionTimeout: function (ms){
-        return new Error('CONNECTION TIMEOUT: timeout of ' + ms + ' ms achived');
+        return new Error('CONNECTION TIMEOUT: timeout of ' + ms + ' ms achieved');
     }
 };
 
@@ -3359,7 +3364,7 @@ SolidityEvent.prototype.attachToContract = function (contract) {
 module.exports = SolidityEvent;
 
 
-},{"../solidity/coder":7,"../utils/sha3":19,"../utils/utils":20,"./filter":29,"./formatters":30,"./methods/watches":43}],28:[function(require,module,exports){
+},{"../solidity/coder":7,"../utils/sha3":19,"../utils/utils":20,"./filter":29,"./formatters":30,"./methods/watches":45}],28:[function(require,module,exports){
 var formatters = require('./formatters');
 var utils = require('./../utils/utils');
 var Method = require('./method');
@@ -3409,7 +3414,7 @@ var extend = function (web3) {
 module.exports = extend;
 
 
-},{"./../utils/utils":20,"./formatters":30,"./method":36,"./property":45}],29:[function(require,module,exports){
+},{"./../utils/utils":20,"./formatters":30,"./method":36,"./property":47}],29:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -3658,20 +3663,20 @@ module.exports = Filter;
 
 },{"../utils/utils":20,"./formatters":30}],30:[function(require,module,exports){
 /*
-    This file is part of web3.js.
+    This file is part of qkc3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
+    qkc3.js is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    web3.js is distributed in the hope that it will be useful,
+    qkc3.js is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
 
     You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
+    along with qkc3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
  * @file formatters.js
@@ -3709,6 +3714,14 @@ var inputDefaultBlockNumberFormatter = function (blockNumber) {
     return inputBlockNumberFormatter(blockNumber);
 };
 
+var inputDefaultBooleanFormatter = function (blockNumber) {
+    if (blockNumber === undefined || typeof blockNumber !== "boolean" ) {
+        return config.booleanFormatter;
+    }
+
+    return blockNumber;
+};
+
 var inputBlockNumberFormatter = function (blockNumber) {
     if (blockNumber === undefined) {
         return undefined;
@@ -3724,7 +3737,7 @@ var inputBlockNumberFormatter = function (blockNumber) {
  * @method inputCallFormatter
  * @param {Object} transaction options
  * @returns object
-*/
+ */
 var inputCallFormatter = function (options){
 
     options.from = options.from || config.defaultAccount;
@@ -3752,21 +3765,22 @@ var inputCallFormatter = function (options){
  * @method inputTransactionFormatter
  * @param {Object} transaction options
  * @returns object
-*/
+ */
 var inputTransactionFormatter = function (options){
 
-    options.from = options.from || config.defaultAccount;
-    options.from = inputAddressFormatter(options.from);
-
-    if (options.to) { // it might be contract creation
-        options.to = inputAddressFormatter(options.to);
-    }
-
-    ['gasPrice', 'gas', 'value', 'nonce'].filter(function (key) {
-        return options[key] !== undefined;
-    }).forEach(function(key){
-        options[key] = utils.fromDecimal(options[key]);
-    });
+    // console.log(options)
+    // options.from = options.from || config.defaultAccount;
+    // options.from = inputAddressFormatter(options.from);
+    //
+    // if (options.to) { // it might be contract creation
+    //     options.to = inputAddressFormatter(options.to);
+    // }
+    //
+    // ['gasPrice', 'gas', 'value', 'nonce'].filter(function (key) {
+    //     return options[key] !== undefined;
+    // }).forEach(function(key){
+    //     options[key] = utils.fromDecimal(options[key]);
+    // });
 
     return options;
 };
@@ -3777,7 +3791,7 @@ var inputTransactionFormatter = function (options){
  * @method outputTransactionFormatter
  * @param {Object} tx
  * @returns {Object}
-*/
+ */
 var outputTransactionFormatter = function (tx){
     if(tx.blockNumber !== null)
         tx.blockNumber = utils.toDecimal(tx.blockNumber);
@@ -3796,7 +3810,7 @@ var outputTransactionFormatter = function (tx){
  * @method outputTransactionReceiptFormatter
  * @param {Object} receipt
  * @returns {Object}
-*/
+ */
 var outputTransactionReceiptFormatter = function (receipt){
     if(receipt.blockNumber !== null)
         receipt.blockNumber = utils.toDecimal(receipt.blockNumber);
@@ -3820,7 +3834,7 @@ var outputTransactionReceiptFormatter = function (receipt){
  * @method outputBlockFormatter
  * @param {Object} block
  * @returns {Object}
-*/
+ */
 var outputBlockFormatter = function(block) {
 
     // transform to number
@@ -3850,7 +3864,7 @@ var outputBlockFormatter = function(block) {
  * @method outputLogFormatter
  * @param {Object} log object
  * @returns {Object} log
-*/
+ */
 var outputLogFormatter = function(log) {
     if(log.blockNumber)
         log.blockNumber = utils.toDecimal(log.blockNumber);
@@ -3868,7 +3882,7 @@ var outputLogFormatter = function(log) {
  * @method inputPostFormatter
  * @param {Object} transaction object
  * @returns {Object}
-*/
+ */
 var inputPostFormatter = function(post) {
 
     // post.payload = utils.toHex(post.payload);
@@ -3957,6 +3971,326 @@ module.exports = {
     inputTransactionFormatter: inputTransactionFormatter,
     inputAddressFormatter: inputAddressFormatter,
     inputPostFormatter: inputPostFormatter,
+    inputDefaultBooleanFormatter: inputDefaultBooleanFormatter,
+    outputBigNumberFormatter: outputBigNumberFormatter,
+    outputTransactionFormatter: outputTransactionFormatter,
+    outputTransactionReceiptFormatter: outputTransactionReceiptFormatter,
+    outputBlockFormatter: outputBlockFormatter,
+    outputLogFormatter: outputLogFormatter,
+    outputPostFormatter: outputPostFormatter,
+    outputSyncingFormatter: outputSyncingFormatter
+};
+
+/*
+    This file is part of qkc3.js.
+
+    qkc3.js is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    qkc3.js is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with qkc3.js.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * @file formatters.js
+ * @author Marek Kotewicz <marek@ethdev.com>
+ * @author Fabian Vogelsteller <fabian@ethdev.com>
+ * @date 2015
+ */
+
+'use strict';
+
+
+var utils = require('../utils/utils');
+var config = require('../utils/config');
+var Iban = require('./iban');
+
+/**
+ * Should the format output to a big number
+ *
+ * @method outputBigNumberFormatter
+ * @param {String|Number|BigNumber}
+ * @returns {BigNumber} object
+ */
+var outputBigNumberFormatter = function (number) {
+    return utils.toBigNumber(number);
+};
+
+var isPredefinedBlockNumber = function (blockNumber) {
+    return blockNumber === 'latest' || blockNumber === 'pending' || blockNumber === 'earliest';
+};
+
+var inputDefaultBlockNumberFormatter = function (blockNumber) {
+    if (blockNumber === undefined) {
+        return config.defaultBlock;
+    }
+    return inputBlockNumberFormatter(blockNumber);
+};
+
+var inputDefaultBooleanFormatter = function (blockNumber) {
+    if (blockNumber === undefined || typeof blockNumber !== "boolean" ) {
+        return config.booleanFormatter;
+    }
+
+    return blockNumber;
+};
+
+var inputBlockNumberFormatter = function (blockNumber) {
+    if (blockNumber === undefined) {
+        return undefined;
+    } else if (isPredefinedBlockNumber(blockNumber)) {
+        return blockNumber;
+    }
+    return utils.toHex(blockNumber);
+};
+
+/**
+ * Formats the input of a transaction and converts all values to HEX
+ *
+ * @method inputCallFormatter
+ * @param {Object} transaction options
+ * @returns object
+ */
+var inputCallFormatter = function (options){
+
+    options.from = options.from || config.defaultAccount;
+
+    if (options.from) {
+        options.from = inputAddressFormatter(options.from);
+    }
+
+    if (options.to) { // it might be contract creation
+        options.to = inputAddressFormatter(options.to);
+    }
+
+    ['gasPrice', 'gas', 'value', 'nonce'].filter(function (key) {
+        return options[key] !== undefined;
+    }).forEach(function(key){
+        options[key] = utils.fromDecimal(options[key]);
+    });
+
+    return options;
+};
+
+/**
+ * Formats the input of a transaction and converts all values to HEX
+ *
+ * @method inputTransactionFormatter
+ * @param {Object} transaction options
+ * @returns object
+ */
+var inputTransactionFormatter = function (options){
+
+    // console.log(options)
+    // options.from = options.from || config.defaultAccount;
+    // options.from = inputAddressFormatter(options.from);
+    //
+    // if (options.to) { // it might be contract creation
+    //     options.to = inputAddressFormatter(options.to);
+    // }
+    //
+    // ['gasPrice', 'gas', 'value', 'nonce'].filter(function (key) {
+    //     return options[key] !== undefined;
+    // }).forEach(function(key){
+    //     options[key] = utils.fromDecimal(options[key]);
+    // });
+
+    return options;
+};
+
+/**
+ * Formats the output of a transaction to its proper values
+ *
+ * @method outputTransactionFormatter
+ * @param {Object} tx
+ * @returns {Object}
+ */
+var outputTransactionFormatter = function (tx){
+    if(tx.blockNumber !== null)
+        tx.blockNumber = utils.toDecimal(tx.blockNumber);
+    if(tx.transactionIndex !== null)
+        tx.transactionIndex = utils.toDecimal(tx.transactionIndex);
+    tx.nonce = utils.toDecimal(tx.nonce);
+    tx.gas = utils.toDecimal(tx.gas);
+    tx.gasPrice = utils.toBigNumber(tx.gasPrice);
+    tx.value = utils.toBigNumber(tx.value);
+    return tx;
+};
+
+/**
+ * Formats the output of a transaction receipt to its proper values
+ *
+ * @method outputTransactionReceiptFormatter
+ * @param {Object} receipt
+ * @returns {Object}
+ */
+var outputTransactionReceiptFormatter = function (receipt){
+    if(receipt.blockNumber !== null)
+        receipt.blockNumber = utils.toDecimal(receipt.blockNumber);
+    if(receipt.transactionIndex !== null)
+        receipt.transactionIndex = utils.toDecimal(receipt.transactionIndex);
+    receipt.cumulativeGasUsed = utils.toDecimal(receipt.cumulativeGasUsed);
+    receipt.gasUsed = utils.toDecimal(receipt.gasUsed);
+
+    if(utils.isArray(receipt.logs)) {
+        receipt.logs = receipt.logs.map(function(log){
+            return outputLogFormatter(log);
+        });
+    }
+
+    return receipt;
+};
+
+/**
+ * Formats the output of a block to its proper values
+ *
+ * @method outputBlockFormatter
+ * @param {Object} block
+ * @returns {Object}
+ */
+var outputBlockFormatter = function(block) {
+
+    // transform to number
+    block.gasLimit = utils.toDecimal(block.gasLimit);
+    block.gasUsed = utils.toDecimal(block.gasUsed);
+    block.size = utils.toDecimal(block.size);
+    block.timestamp = utils.toDecimal(block.timestamp);
+    if(block.number !== null)
+        block.number = utils.toDecimal(block.number);
+
+    block.difficulty = utils.toBigNumber(block.difficulty);
+    block.totalDifficulty = utils.toBigNumber(block.totalDifficulty);
+
+    if (utils.isArray(block.transactions)) {
+        block.transactions.forEach(function(item){
+            if(!utils.isString(item))
+                return outputTransactionFormatter(item);
+        });
+    }
+
+    return block;
+};
+
+/**
+ * Formats the output of a log
+ *
+ * @method outputLogFormatter
+ * @param {Object} log object
+ * @returns {Object} log
+ */
+var outputLogFormatter = function(log) {
+    if(log.blockNumber)
+        log.blockNumber = utils.toDecimal(log.blockNumber);
+    if(log.transactionIndex)
+        log.transactionIndex = utils.toDecimal(log.transactionIndex);
+    if(log.logIndex)
+        log.logIndex = utils.toDecimal(log.logIndex);
+
+    return log;
+};
+
+/**
+ * Formats the input of a whisper post and converts all values to HEX
+ *
+ * @method inputPostFormatter
+ * @param {Object} transaction object
+ * @returns {Object}
+ */
+var inputPostFormatter = function(post) {
+
+    // post.payload = utils.toHex(post.payload);
+    post.ttl = utils.fromDecimal(post.ttl);
+    post.workToProve = utils.fromDecimal(post.workToProve);
+    post.priority = utils.fromDecimal(post.priority);
+
+    // fallback
+    if (!utils.isArray(post.topics)) {
+        post.topics = post.topics ? [post.topics] : [];
+    }
+
+    // format the following options
+    post.topics = post.topics.map(function(topic){
+        // convert only if not hex
+        return (topic.indexOf('0x') === 0) ? topic : utils.fromUtf8(topic);
+    });
+
+    return post;
+};
+
+/**
+ * Formats the output of a received post message
+ *
+ * @method outputPostFormatter
+ * @param {Object}
+ * @returns {Object}
+ */
+var outputPostFormatter = function(post){
+
+    post.expiry = utils.toDecimal(post.expiry);
+    post.sent = utils.toDecimal(post.sent);
+    post.ttl = utils.toDecimal(post.ttl);
+    post.workProved = utils.toDecimal(post.workProved);
+    // post.payloadRaw = post.payload;
+    // post.payload = utils.toAscii(post.payload);
+
+    // if (utils.isJson(post.payload)) {
+    //     post.payload = JSON.parse(post.payload);
+    // }
+
+    // format the following options
+    if (!post.topics) {
+        post.topics = [];
+    }
+    post.topics = post.topics.map(function(topic){
+        return utils.toAscii(topic);
+    });
+
+    return post;
+};
+
+var inputAddressFormatter = function (address) {
+    var iban = new Iban(address);
+    if (iban.isValid() && iban.isDirect()) {
+        return '0x' + iban.address();
+    } else if (utils.isStrictAddress(address)) {
+        return address;
+    } else if (utils.isAddress(address)) {
+        return '0x' + address;
+    }
+    throw new Error('invalid address');
+};
+
+
+var outputSyncingFormatter = function(result) {
+    if (!result) {
+        return result;
+    }
+
+    result.startingBlock = utils.toDecimal(result.startingBlock);
+    result.currentBlock = utils.toDecimal(result.currentBlock);
+    result.highestBlock = utils.toDecimal(result.highestBlock);
+    if (result.knownStates) {
+        result.knownStates = utils.toDecimal(result.knownStates);
+        result.pulledStates = utils.toDecimal(result.pulledStates);
+    }
+
+    return result;
+};
+
+module.exports = {
+    inputDefaultBlockNumberFormatter: inputDefaultBlockNumberFormatter,
+    inputBlockNumberFormatter: inputBlockNumberFormatter,
+    inputCallFormatter: inputCallFormatter,
+    inputTransactionFormatter: inputTransactionFormatter,
+    inputAddressFormatter: inputAddressFormatter,
+    inputPostFormatter: inputPostFormatter,
+    inputDefaultBooleanFormatter: inputDefaultBooleanFormatter,
     outputBigNumberFormatter: outputBigNumberFormatter,
     outputTransactionFormatter: outputTransactionFormatter,
     outputTransactionReceiptFormatter: outputTransactionReceiptFormatter,
@@ -4367,6 +4701,7 @@ HttpProvider.prototype.send = function (payload) {
  * @method sendAsync
  * @param {Object} payload
  * @param {Function} callback triggered on end with (err, result)
+ * @return {XMLHttpRequest} object
  */
 HttpProvider.prototype.sendAsync = function (payload, callback) {
   var request = this.prepareRequest(true);
@@ -4395,6 +4730,7 @@ HttpProvider.prototype.sendAsync = function (payload, callback) {
   } catch (error) {
     callback(errors.InvalidConnection(this.host));
   }
+  return request;
 };
 
 /**
@@ -4421,7 +4757,7 @@ module.exports = HttpProvider;
 
 }).call(this,require("buffer").Buffer)
 
-},{"./errors":26,"buffer":53,"xhr2-cookies":126,"xmlhttprequest":17}],33:[function(require,module,exports){
+},{"./errors":26,"buffer":55,"xhr2-cookies":128,"xmlhttprequest":17}],33:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -4438,7 +4774,7 @@ module.exports = HttpProvider;
     You should have received a copy of the GNU Lesser General Public License
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-/** 
+/**
  * @file iban.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @date 2015
@@ -4570,7 +4906,7 @@ Iban.isValid = function (iban) {
  * @returns {Boolean} true if it is, otherwise false
  */
 Iban.prototype.isValid = function () {
-    return /^XE[0-9]{2}(ETH[0-9A-Z]{13}|[0-9A-Z]{30,31})$/.test(this._iban) &&
+    return /^XE[0-9]{2}(ETH[0-9A-Z]{13}|[0-9A-Z]{48})$/.test(this._iban) &&
         mod9710(iso13616Prepare(this._iban)) === 1;
 };
 
@@ -4581,7 +4917,7 @@ Iban.prototype.isValid = function () {
  * @returns {Boolean} true if it is, otherwise false
  */
 Iban.prototype.isDirect = function () {
-    return this._iban.length === 34 || this._iban.length === 35;
+    return this._iban.length === 50;
 };
 
 /**
@@ -4638,7 +4974,7 @@ Iban.prototype.address = function () {
         var base36 = this._iban.substr(4);
         var asBn = new BigNumber(base36, 36);
         return padLeft(asBn.toString(16), 20);
-    } 
+    }
 
     return '';
 };
@@ -5198,6 +5534,66 @@ module.exports = DB;
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
+ * @file debug.js
+ * @author ewasm team
+ * @date 2018
+ */
+
+"use strict";
+
+var Method = require('../method');
+
+function Debug(web3) {
+    this._requestManager = web3._requestManager;
+
+    var self = this;
+
+    methods().forEach(function(method) {
+        method.attachToObject(self);
+        method.setRequestManager(self._requestManager);
+    });
+}
+
+var methods = function () {
+
+    var accountRangeAt = new Method({
+        name: 'accountRangeAt',
+        call: 'debug_accountRangeAt',
+        params: 4
+    });
+
+    var storageRangeAt = new Method({
+        name: 'storageRangeAt',
+        call: 'debug_storageRangeAt',
+        params: 5
+    });
+
+    return [
+        accountRangeAt,
+        storageRangeAt
+    ];
+};
+
+module.exports = Debug;
+
+},{"../method":36}],39:[function(require,module,exports){
+/*
+    This file is part of web3.js.
+
+    web3.js is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    web3.js is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
  * @file eth.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @author Fabian Vogelsteller <fabian@ethdev.com>
@@ -5319,12 +5715,6 @@ var methods = function () {
 
     });
 
-    var getCompilers = new Method({
-        name: 'getCompilers',
-        call: 'eth_getCompilers',
-        params: 0
-    });
-
     var getBlockTransactionCount = new Method({
         name: 'getBlockTransactionCount',
         call: getBlockTransactionCountCall,
@@ -5414,22 +5804,12 @@ var methods = function () {
         outputFormatter: utils.toDecimal
     });
 
-    var compileSolidity = new Method({
-        name: 'compile.solidity',
-        call: 'eth_compileSolidity',
-        params: 1
-    });
-
-    var compileLLL = new Method({
-        name: 'compile.lll',
-        call: 'eth_compileLLL',
-        params: 1
-    });
-
-    var compileSerpent = new Method({
-        name: 'compile.serpent',
-        call: 'eth_compileSerpent',
-        params: 1
+    var getLogs = new Method({
+        name: 'getLogs',
+        call: 'eth_getLogs',
+        params: 1,
+        inputFormatter: [formatters.inputGetLogsFormatter],
+        outputFormatter: formatters.outputLogFormatter
     });
 
     var submitWork = new Method({
@@ -5450,7 +5830,6 @@ var methods = function () {
         getCode,
         getBlock,
         getUncle,
-        getCompilers,
         getBlockTransactionCount,
         getBlockUncleCount,
         getTransaction,
@@ -5463,10 +5842,8 @@ var methods = function () {
         signTransaction,
         sendTransaction,
         sign,
-        compileSolidity,
-        compileLLL,
-        compileSerpent,
         submitWork,
+        getLogs,
         getWork
     ];
 };
@@ -5536,7 +5913,7 @@ Eth.prototype.isSyncing = function (callback) {
 
 module.exports = Eth;
 
-},{"../../utils/config":18,"../../utils/utils":20,"../contract":25,"../filter":29,"../formatters":30,"../iban":33,"../method":36,"../namereg":44,"../property":45,"../syncing":48,"../transfer":49,"./watches":43}],39:[function(require,module,exports){
+},{"../../utils/config":18,"../../utils/utils":20,"../contract":25,"../filter":29,"../formatters":30,"../iban":33,"../method":36,"../namereg":46,"../property":47,"../syncing":50,"../transfer":51,"./watches":45}],40:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -5590,7 +5967,7 @@ var properties = function () {
 
 module.exports = Net;
 
-},{"../../utils/utils":20,"../property":45}],40:[function(require,module,exports){
+},{"../../utils/utils":20,"../property":47}],41:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -5707,7 +6084,216 @@ var properties = function () {
 
 module.exports = Personal;
 
-},{"../formatters":30,"../method":36,"../property":45}],41:[function(require,module,exports){
+},{"../formatters":30,"../method":36,"../property":47}],42:[function(require,module,exports){
+/*
+    This file is part of qkc3.js.
+
+    qkc3.js is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    qkc3.js is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with qkc3.js.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/**
+ * @file eth.js
+ * @author Marek Kotewicz <marek@ethdev.com>
+ * @author Fabian Vogelsteller <fabian@ethdev.com>
+ * @date 2015
+ */
+
+"use strict";
+
+var formatters      = require('../formatters');
+var IsSyncing       = require('../syncing');
+var Property        = require('../property');
+var transfer        = require('../transfer');
+var Contract        = require('../contract');
+var namereg         = require('../namereg');
+var watches         = require('./watches');
+var Method          = require('../method');
+var Filter          = require('../filter');
+var utils           = require('../../utils/utils');
+var Iban            = require('../iban');
+var c               = require('../../utils/config');
+
+
+function Qkc(qkc3) {
+
+
+    this._requestManager = qkc3._requestManager;
+
+    var self = this;
+
+    methods().forEach(function(method) {
+        method.attachToObject(self);
+        method.setRequestManager(self._requestManager);
+    });
+
+    properties().forEach(function(p) {
+        p.attachToObject(self);
+        p.setRequestManager(self._requestManager);
+    });
+
+
+    this.iban = Iban;
+    this.sendIBANTransaction = transfer.bind(null, this);
+}
+
+Object.defineProperty(Qkc.prototype, 'defaultBlock', {
+    get: function () {
+        return c.defaultBlock;
+    },
+    set: function (val) {
+        c.defaultBlock = val;
+        return val;
+    }
+});
+
+Object.defineProperty(Qkc.prototype, 'defaultAccount', {
+    get: function () {
+        return c.defaultAccount;
+    },
+    set: function (val) {
+        c.defaultAccount = val;
+        return val;
+    }
+});
+
+var methods = function () {
+    var getAccountData = new Method({
+        name: 'getAccountData',
+        call: 'getAccountData',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBooleanFormatter ],
+        // outputFormatter: formatters.outputBigNumberFormatter
+    });
+
+    var getBalance = new Method({
+        name: 'getBalance',
+        call: 'getBalance',
+        params: 1,
+        inputFormatter: [formatters.inputAddressFormatter],
+    });
+
+    var getCode = new Method({
+        name: 'getCode',
+        call: 'getCode',
+        params: 1,
+        inputFormatter: [formatters.inputAddressFormatter]
+    });
+
+    var getTransactionReceipt = new Method({
+        name: 'getTransactionReceipt',
+        call: 'getTransactionReceipt',
+        params: 1,
+        outputFormatter: formatters.outputTransactionReceiptFormatter
+    });
+
+    var getTransactionCount = new Method({
+        name: 'getTransactionCount',
+        call: 'getTransactionCount',
+        params: 1,
+        inputFormatter: [formatters.inputDefaultBlockNumberFormatter],
+        // outputFormatter: utils.toDecimal
+    });
+
+    var sendTransaction = new Method({
+        name: 'sendTransaction',
+        call: 'sendTransaction',
+        params: 1,
+        inputFormatter: [formatters.inputTransactionFormatter]
+    });
+
+    var call = new Method({
+        name: 'call',
+        call: 'eth_call',
+        params: 2,
+        inputFormatter: [formatters.inputCallFormatter]
+    });
+
+    return [
+        getAccountData,
+        getBalance,
+        getCode,
+        getTransactionReceipt,
+        getTransactionCount,
+        call,
+        sendTransaction
+    ];
+};
+
+var properties = function () {
+    return [
+        new Property({
+            name: 'coinbase',
+            getter: 'eth_coinbase'
+        }),
+        new Property({
+            name: 'mining',
+            getter: 'eth_mining'
+        }),
+        new Property({
+            name: 'hashrate',
+            getter: 'eth_hashrate',
+            outputFormatter: utils.toDecimal
+        }),
+        new Property({
+            name: 'syncing',
+            getter: 'eth_syncing',
+            outputFormatter: formatters.outputSyncingFormatter
+        }),
+        new Property({
+            name: 'gasPrice',
+            getter: 'eth_gasPrice',
+            outputFormatter: formatters.outputBigNumberFormatter
+        }),
+        new Property({
+            name: 'accounts',
+            getter: 'eth_accounts'
+        }),
+        new Property({
+            name: 'blockNumber',
+            getter: 'eth_blockNumber',
+            outputFormatter: utils.toDecimal
+        }),
+        new Property({
+            name: 'protocolVersion',
+            getter: 'eth_protocolVersion'
+        })
+    ];
+};
+
+Qkc.prototype.contract = function (abi) {
+    var factory = new Contract(this, abi);
+    return factory;
+};
+
+Qkc.prototype.filter = function (options, callback, filterCreationErrorCallback) {
+    return new Filter(options, 'eth', this._requestManager, watches.eth(), formatters.outputLogFormatter, callback, filterCreationErrorCallback);
+};
+
+Qkc.prototype.namereg = function () {
+    return this.contract(namereg.global.abi).at(namereg.global.address);
+};
+
+Qkc.prototype.icapNamereg = function () {
+    return this.contract(namereg.icap.abi).at(namereg.icap.address);
+};
+
+Qkc.prototype.isSyncing = function (callback) {
+    return new IsSyncing(this._requestManager, callback);
+};
+
+module.exports = Qkc;
+
+},{"../../utils/config":18,"../../utils/utils":20,"../contract":25,"../filter":29,"../formatters":30,"../iban":33,"../method":36,"../namereg":46,"../property":47,"../syncing":50,"../transfer":51,"./watches":45}],43:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -5853,7 +6439,7 @@ var methods = function () {
 module.exports = Shh;
 
 
-},{"../filter":29,"../method":36,"./watches":43}],42:[function(require,module,exports){
+},{"../filter":29,"../method":36,"./watches":45}],44:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -6000,7 +6586,7 @@ var properties = function () {
 
 module.exports = Swarm;
 
-},{"../method":36,"../property":45}],43:[function(require,module,exports){
+},{"../method":36,"../property":47}],45:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -6109,7 +6695,7 @@ module.exports = {
 };
 
 
-},{"../method":36}],44:[function(require,module,exports){
+},{"../method":36}],46:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -6150,7 +6736,7 @@ module.exports = {
 };
 
 
-},{"../contracts/GlobalRegistrar.json":1,"../contracts/ICAPRegistrar.json":2}],45:[function(require,module,exports){
+},{"../contracts/GlobalRegistrar.json":1,"../contracts/ICAPRegistrar.json":2}],47:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -6296,7 +6882,7 @@ Property.prototype.request = function () {
 module.exports = Property;
 
 
-},{"../utils/utils":20}],46:[function(require,module,exports){
+},{"../utils/utils":20}],48:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -6563,7 +7149,7 @@ RequestManager.prototype.poll = function () {
 module.exports = RequestManager;
 
 
-},{"../utils/config":18,"../utils/utils":20,"./errors":26,"./jsonrpc":35}],47:[function(require,module,exports){
+},{"../utils/config":18,"../utils/utils":20,"./errors":26,"./jsonrpc":35}],49:[function(require,module,exports){
 
 
 var Settings = function () {
@@ -6574,7 +7160,7 @@ var Settings = function () {
 module.exports = Settings;
 
 
-},{}],48:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -6669,7 +7255,7 @@ IsSyncing.prototype.stopWatching = function () {
 module.exports = IsSyncing;
 
 
-},{"../utils/utils":20,"./formatters":30}],49:[function(require,module,exports){
+},{"../utils/utils":20,"./formatters":30}],51:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -6763,7 +7349,7 @@ var deposit = function (eth, from, to, value, client, callback) {
 module.exports = transfer;
 
 
-},{"../contracts/SmartExchange.json":3,"./iban":33}],50:[function(require,module,exports){
+},{"../contracts/SmartExchange.json":3,"./iban":33}],52:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -6916,11 +7502,11 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],51:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 
-},{}],52:[function(require,module,exports){
-arguments[4][51][0].apply(exports,arguments)
-},{"dup":51}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
+arguments[4][53][0].apply(exports,arguments)
+},{"dup":53}],55:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -6969,7 +7555,7 @@ function typedArraySupport () {
   // Can typed array instances can be augmented?
   try {
     var arr = new Uint8Array(1)
-    arr.__proto__ = {__proto__: Uint8Array.prototype, foo: function () { return 42 }}
+    arr.__proto__ = { __proto__: Uint8Array.prototype, foo: function () { return 42 } }
     return arr.foo() === 42
   } catch (e) {
     return false
@@ -6977,26 +7563,24 @@ function typedArraySupport () {
 }
 
 Object.defineProperty(Buffer.prototype, 'parent', {
+  enumerable: true,
   get: function () {
-    if (!(this instanceof Buffer)) {
-      return undefined
-    }
+    if (!Buffer.isBuffer(this)) return undefined
     return this.buffer
   }
 })
 
 Object.defineProperty(Buffer.prototype, 'offset', {
+  enumerable: true,
   get: function () {
-    if (!(this instanceof Buffer)) {
-      return undefined
-    }
+    if (!Buffer.isBuffer(this)) return undefined
     return this.byteOffset
   }
 })
 
 function createBuffer (length) {
   if (length > K_MAX_LENGTH) {
-    throw new RangeError('Invalid typed array length')
+    throw new RangeError('The value "' + length + '" is invalid for option "size"')
   }
   // Return an augmented `Uint8Array` instance
   var buf = new Uint8Array(length)
@@ -7018,8 +7602,8 @@ function Buffer (arg, encodingOrOffset, length) {
   // Common case.
   if (typeof arg === 'number') {
     if (typeof encodingOrOffset === 'string') {
-      throw new Error(
-        'If encoding is specified then the first argument must be a string'
+      throw new TypeError(
+        'The "string" argument must be of type string. Received type number'
       )
     }
     return allocUnsafe(arg)
@@ -7028,7 +7612,7 @@ function Buffer (arg, encodingOrOffset, length) {
 }
 
 // Fix subarray() in ES2016. See: https://github.com/feross/buffer/pull/97
-if (typeof Symbol !== 'undefined' && Symbol.species &&
+if (typeof Symbol !== 'undefined' && Symbol.species != null &&
     Buffer[Symbol.species] === Buffer) {
   Object.defineProperty(Buffer, Symbol.species, {
     value: null,
@@ -7041,19 +7625,51 @@ if (typeof Symbol !== 'undefined' && Symbol.species &&
 Buffer.poolSize = 8192 // not used by this implementation
 
 function from (value, encodingOrOffset, length) {
-  if (typeof value === 'number') {
-    throw new TypeError('"value" argument must not be a number')
-  }
-
-  if (isArrayBuffer(value) || (value && isArrayBuffer(value.buffer))) {
-    return fromArrayBuffer(value, encodingOrOffset, length)
-  }
-
   if (typeof value === 'string') {
     return fromString(value, encodingOrOffset)
   }
 
-  return fromObject(value)
+  if (ArrayBuffer.isView(value)) {
+    return fromArrayLike(value)
+  }
+
+  if (value == null) {
+    throw TypeError(
+      'The first argument must be one of type string, Buffer, ArrayBuffer, Array, ' +
+      'or Array-like Object. Received type ' + (typeof value)
+    )
+  }
+
+  if (isInstance(value, ArrayBuffer) ||
+      (value && isInstance(value.buffer, ArrayBuffer))) {
+    return fromArrayBuffer(value, encodingOrOffset, length)
+  }
+
+  if (typeof value === 'number') {
+    throw new TypeError(
+      'The "value" argument must not be of type number. Received type number'
+    )
+  }
+
+  var valueOf = value.valueOf && value.valueOf()
+  if (valueOf != null && valueOf !== value) {
+    return Buffer.from(valueOf, encodingOrOffset, length)
+  }
+
+  var b = fromObject(value)
+  if (b) return b
+
+  if (typeof Symbol !== 'undefined' && Symbol.toPrimitive != null &&
+      typeof value[Symbol.toPrimitive] === 'function') {
+    return Buffer.from(
+      value[Symbol.toPrimitive]('string'), encodingOrOffset, length
+    )
+  }
+
+  throw new TypeError(
+    'The first argument must be one of type string, Buffer, ArrayBuffer, Array, ' +
+    'or Array-like Object. Received type ' + (typeof value)
+  )
 }
 
 /**
@@ -7077,7 +7693,7 @@ function assertSize (size) {
   if (typeof size !== 'number') {
     throw new TypeError('"size" argument must be of type number')
   } else if (size < 0) {
-    throw new RangeError('"size" argument must not be negative')
+    throw new RangeError('The value "' + size + '" is invalid for option "size"')
   }
 }
 
@@ -7192,20 +7808,16 @@ function fromObject (obj) {
     return buf
   }
 
-  if (obj) {
-    if (ArrayBuffer.isView(obj) || 'length' in obj) {
-      if (typeof obj.length !== 'number' || numberIsNaN(obj.length)) {
-        return createBuffer(0)
-      }
-      return fromArrayLike(obj)
+  if (obj.length !== undefined) {
+    if (typeof obj.length !== 'number' || numberIsNaN(obj.length)) {
+      return createBuffer(0)
     }
-
-    if (obj.type === 'Buffer' && Array.isArray(obj.data)) {
-      return fromArrayLike(obj.data)
-    }
+    return fromArrayLike(obj)
   }
 
-  throw new TypeError('The first argument must be one of type string, Buffer, ArrayBuffer, Array, or Array-like Object.')
+  if (obj.type === 'Buffer' && Array.isArray(obj.data)) {
+    return fromArrayLike(obj.data)
+  }
 }
 
 function checked (length) {
@@ -7226,12 +7838,17 @@ function SlowBuffer (length) {
 }
 
 Buffer.isBuffer = function isBuffer (b) {
-  return b != null && b._isBuffer === true
+  return b != null && b._isBuffer === true &&
+    b !== Buffer.prototype // so Buffer.isBuffer(Buffer.prototype) will be false
 }
 
 Buffer.compare = function compare (a, b) {
+  if (isInstance(a, Uint8Array)) a = Buffer.from(a, a.offset, a.byteLength)
+  if (isInstance(b, Uint8Array)) b = Buffer.from(b, b.offset, b.byteLength)
   if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
-    throw new TypeError('Arguments must be Buffers')
+    throw new TypeError(
+      'The "buf1", "buf2" arguments must be one of type Buffer or Uint8Array'
+    )
   }
 
   if (a === b) return 0
@@ -7292,7 +7909,7 @@ Buffer.concat = function concat (list, length) {
   var pos = 0
   for (i = 0; i < list.length; ++i) {
     var buf = list[i]
-    if (ArrayBuffer.isView(buf)) {
+    if (isInstance(buf, Uint8Array)) {
       buf = Buffer.from(buf)
     }
     if (!Buffer.isBuffer(buf)) {
@@ -7308,15 +7925,19 @@ function byteLength (string, encoding) {
   if (Buffer.isBuffer(string)) {
     return string.length
   }
-  if (ArrayBuffer.isView(string) || isArrayBuffer(string)) {
+  if (ArrayBuffer.isView(string) || isInstance(string, ArrayBuffer)) {
     return string.byteLength
   }
   if (typeof string !== 'string') {
-    string = '' + string
+    throw new TypeError(
+      'The "string" argument must be one of type string, Buffer, or ArrayBuffer. ' +
+      'Received type ' + typeof string
+    )
   }
 
   var len = string.length
-  if (len === 0) return 0
+  var mustMatch = (arguments.length > 2 && arguments[2] === true)
+  if (!mustMatch && len === 0) return 0
 
   // Use a for loop to avoid recursion
   var loweredCase = false
@@ -7328,7 +7949,6 @@ function byteLength (string, encoding) {
         return len
       case 'utf8':
       case 'utf-8':
-      case undefined:
         return utf8ToBytes(string).length
       case 'ucs2':
       case 'ucs-2':
@@ -7340,7 +7960,9 @@ function byteLength (string, encoding) {
       case 'base64':
         return base64ToBytes(string).length
       default:
-        if (loweredCase) return utf8ToBytes(string).length // assume utf8
+        if (loweredCase) {
+          return mustMatch ? -1 : utf8ToBytes(string).length // assume utf8
+        }
         encoding = ('' + encoding).toLowerCase()
         loweredCase = true
     }
@@ -7487,16 +8109,20 @@ Buffer.prototype.equals = function equals (b) {
 Buffer.prototype.inspect = function inspect () {
   var str = ''
   var max = exports.INSPECT_MAX_BYTES
-  if (this.length > 0) {
-    str = this.toString('hex', 0, max).match(/.{2}/g).join(' ')
-    if (this.length > max) str += ' ... '
-  }
+  str = this.toString('hex', 0, max).replace(/(.{2})/g, '$1 ').trim()
+  if (this.length > max) str += ' ... '
   return '<Buffer ' + str + '>'
 }
 
 Buffer.prototype.compare = function compare (target, start, end, thisStart, thisEnd) {
+  if (isInstance(target, Uint8Array)) {
+    target = Buffer.from(target, target.offset, target.byteLength)
+  }
   if (!Buffer.isBuffer(target)) {
-    throw new TypeError('Argument must be a Buffer')
+    throw new TypeError(
+      'The "target" argument must be one of type Buffer or Uint8Array. ' +
+      'Received type ' + (typeof target)
+    )
   }
 
   if (start === undefined) {
@@ -7575,7 +8201,7 @@ function bidirectionalIndexOf (buffer, val, byteOffset, encoding, dir) {
   } else if (byteOffset < -0x80000000) {
     byteOffset = -0x80000000
   }
-  byteOffset = +byteOffset  // Coerce to Number.
+  byteOffset = +byteOffset // Coerce to Number.
   if (numberIsNaN(byteOffset)) {
     // byteOffset: it it's undefined, null, NaN, "foo", etc, search whole buffer
     byteOffset = dir ? 0 : (buffer.length - 1)
@@ -7827,8 +8453,8 @@ function utf8Slice (buf, start, end) {
     var codePoint = null
     var bytesPerSequence = (firstByte > 0xEF) ? 4
       : (firstByte > 0xDF) ? 3
-      : (firstByte > 0xBF) ? 2
-      : 1
+        : (firstByte > 0xBF) ? 2
+          : 1
 
     if (i + bytesPerSequence <= end) {
       var secondByte, thirdByte, fourthByte, tempCodePoint
@@ -8491,7 +9117,7 @@ Buffer.prototype.fill = function fill (val, start, end, encoding) {
   } else {
     var bytes = Buffer.isBuffer(val)
       ? val
-      : new Buffer(val, encoding)
+      : Buffer.from(val, encoding)
     var len = bytes.length
     if (len === 0) {
       throw new TypeError('The value "' + val +
@@ -8646,19 +9272,20 @@ function blitBuffer (src, dst, offset, length) {
   return i
 }
 
-// ArrayBuffers from another context (i.e. an iframe) do not pass the `instanceof` check
-// but they should be treated as valid. See: https://github.com/feross/buffer/issues/166
-function isArrayBuffer (obj) {
-  return obj instanceof ArrayBuffer ||
-    (obj != null && obj.constructor != null && obj.constructor.name === 'ArrayBuffer' &&
-      typeof obj.byteLength === 'number')
+// ArrayBuffer or Uint8Array objects from other contexts (i.e. iframes) do not pass
+// the `instanceof` check but they should be treated as of that type.
+// See: https://github.com/feross/buffer/issues/166
+function isInstance (obj, type) {
+  return obj instanceof type ||
+    (obj != null && obj.constructor != null && obj.constructor.name != null &&
+      obj.constructor.name === type.name)
 }
-
 function numberIsNaN (obj) {
+  // For IE11 support
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":50,"ieee754":93}],54:[function(require,module,exports){
+},{"base64-js":52,"ieee754":95}],56:[function(require,module,exports){
 module.exports = {
   "100": "Continue",
   "101": "Switching Protocols",
@@ -8724,7 +9351,7 @@ module.exports = {
   "511": "Network Authentication Required"
 }
 
-},{}],55:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 /* jshint node: true */
 (function () {
     "use strict";
@@ -9002,7 +9629,7 @@ module.exports = {
     };
 }());
 
-},{}],56:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -9114,7 +9741,7 @@ function objectToString(o) {
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
 
-},{"../../is-buffer/index.js":95}],57:[function(require,module,exports){
+},{"../../is-buffer/index.js":97}],59:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -9347,7 +9974,7 @@ function objectToString(o) {
 	return CryptoJS.AES;
 
 }));
-},{"./cipher-core":58,"./core":59,"./enc-base64":60,"./evpkdf":62,"./md5":67}],58:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61,"./enc-base64":62,"./evpkdf":64,"./md5":69}],60:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -10223,7 +10850,7 @@ function objectToString(o) {
 
 
 }));
-},{"./core":59}],59:[function(require,module,exports){
+},{"./core":61}],61:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -10984,7 +11611,7 @@ function objectToString(o) {
 	return CryptoJS;
 
 }));
-},{}],60:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -11120,7 +11747,7 @@ function objectToString(o) {
 	return CryptoJS.enc.Base64;
 
 }));
-},{"./core":59}],61:[function(require,module,exports){
+},{"./core":61}],63:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -11270,7 +11897,7 @@ function objectToString(o) {
 	return CryptoJS.enc.Utf16;
 
 }));
-},{"./core":59}],62:[function(require,module,exports){
+},{"./core":61}],64:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -11403,7 +12030,7 @@ function objectToString(o) {
 	return CryptoJS.EvpKDF;
 
 }));
-},{"./core":59,"./hmac":64,"./sha1":83}],63:[function(require,module,exports){
+},{"./core":61,"./hmac":66,"./sha1":85}],65:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -11470,7 +12097,7 @@ function objectToString(o) {
 	return CryptoJS.format.Hex;
 
 }));
-},{"./cipher-core":58,"./core":59}],64:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61}],66:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -11614,7 +12241,7 @@ function objectToString(o) {
 
 
 }));
-},{"./core":59}],65:[function(require,module,exports){
+},{"./core":61}],67:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -11633,7 +12260,7 @@ function objectToString(o) {
 	return CryptoJS;
 
 }));
-},{"./aes":57,"./cipher-core":58,"./core":59,"./enc-base64":60,"./enc-utf16":61,"./evpkdf":62,"./format-hex":63,"./hmac":64,"./lib-typedarrays":66,"./md5":67,"./mode-cfb":68,"./mode-ctr":70,"./mode-ctr-gladman":69,"./mode-ecb":71,"./mode-ofb":72,"./pad-ansix923":73,"./pad-iso10126":74,"./pad-iso97971":75,"./pad-nopadding":76,"./pad-zeropadding":77,"./pbkdf2":78,"./rabbit":80,"./rabbit-legacy":79,"./rc4":81,"./ripemd160":82,"./sha1":83,"./sha224":84,"./sha256":85,"./sha3":86,"./sha384":87,"./sha512":88,"./tripledes":89,"./x64-core":90}],66:[function(require,module,exports){
+},{"./aes":59,"./cipher-core":60,"./core":61,"./enc-base64":62,"./enc-utf16":63,"./evpkdf":64,"./format-hex":65,"./hmac":66,"./lib-typedarrays":68,"./md5":69,"./mode-cfb":70,"./mode-ctr":72,"./mode-ctr-gladman":71,"./mode-ecb":73,"./mode-ofb":74,"./pad-ansix923":75,"./pad-iso10126":76,"./pad-iso97971":77,"./pad-nopadding":78,"./pad-zeropadding":79,"./pbkdf2":80,"./rabbit":82,"./rabbit-legacy":81,"./rc4":83,"./ripemd160":84,"./sha1":85,"./sha224":86,"./sha256":87,"./sha3":88,"./sha384":89,"./sha512":90,"./tripledes":91,"./x64-core":92}],68:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -11710,7 +12337,7 @@ function objectToString(o) {
 	return CryptoJS.lib.WordArray;
 
 }));
-},{"./core":59}],67:[function(require,module,exports){
+},{"./core":61}],69:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -11979,7 +12606,7 @@ function objectToString(o) {
 	return CryptoJS.MD5;
 
 }));
-},{"./core":59}],68:[function(require,module,exports){
+},{"./core":61}],70:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -12058,7 +12685,7 @@ function objectToString(o) {
 	return CryptoJS.mode.CFB;
 
 }));
-},{"./cipher-core":58,"./core":59}],69:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61}],71:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -12175,7 +12802,7 @@ function objectToString(o) {
 	return CryptoJS.mode.CTRGladman;
 
 }));
-},{"./cipher-core":58,"./core":59}],70:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61}],72:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -12234,7 +12861,7 @@ function objectToString(o) {
 	return CryptoJS.mode.CTR;
 
 }));
-},{"./cipher-core":58,"./core":59}],71:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61}],73:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -12275,7 +12902,7 @@ function objectToString(o) {
 	return CryptoJS.mode.ECB;
 
 }));
-},{"./cipher-core":58,"./core":59}],72:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61}],74:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -12330,7 +12957,7 @@ function objectToString(o) {
 	return CryptoJS.mode.OFB;
 
 }));
-},{"./cipher-core":58,"./core":59}],73:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61}],75:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -12380,7 +13007,7 @@ function objectToString(o) {
 	return CryptoJS.pad.Ansix923;
 
 }));
-},{"./cipher-core":58,"./core":59}],74:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61}],76:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -12425,7 +13052,7 @@ function objectToString(o) {
 	return CryptoJS.pad.Iso10126;
 
 }));
-},{"./cipher-core":58,"./core":59}],75:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61}],77:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -12466,7 +13093,7 @@ function objectToString(o) {
 	return CryptoJS.pad.Iso97971;
 
 }));
-},{"./cipher-core":58,"./core":59}],76:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61}],78:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -12497,7 +13124,7 @@ function objectToString(o) {
 	return CryptoJS.pad.NoPadding;
 
 }));
-},{"./cipher-core":58,"./core":59}],77:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61}],79:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -12543,7 +13170,7 @@ function objectToString(o) {
 	return CryptoJS.pad.ZeroPadding;
 
 }));
-},{"./cipher-core":58,"./core":59}],78:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61}],80:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -12689,7 +13316,7 @@ function objectToString(o) {
 	return CryptoJS.PBKDF2;
 
 }));
-},{"./core":59,"./hmac":64,"./sha1":83}],79:[function(require,module,exports){
+},{"./core":61,"./hmac":66,"./sha1":85}],81:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -12880,7 +13507,7 @@ function objectToString(o) {
 	return CryptoJS.RabbitLegacy;
 
 }));
-},{"./cipher-core":58,"./core":59,"./enc-base64":60,"./evpkdf":62,"./md5":67}],80:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61,"./enc-base64":62,"./evpkdf":64,"./md5":69}],82:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -13073,7 +13700,7 @@ function objectToString(o) {
 	return CryptoJS.Rabbit;
 
 }));
-},{"./cipher-core":58,"./core":59,"./enc-base64":60,"./evpkdf":62,"./md5":67}],81:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61,"./enc-base64":62,"./evpkdf":64,"./md5":69}],83:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -13213,7 +13840,7 @@ function objectToString(o) {
 	return CryptoJS.RC4;
 
 }));
-},{"./cipher-core":58,"./core":59,"./enc-base64":60,"./evpkdf":62,"./md5":67}],82:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61,"./enc-base64":62,"./evpkdf":64,"./md5":69}],84:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -13481,7 +14108,7 @@ function objectToString(o) {
 	return CryptoJS.RIPEMD160;
 
 }));
-},{"./core":59}],83:[function(require,module,exports){
+},{"./core":61}],85:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -13632,7 +14259,7 @@ function objectToString(o) {
 	return CryptoJS.SHA1;
 
 }));
-},{"./core":59}],84:[function(require,module,exports){
+},{"./core":61}],86:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -13713,7 +14340,7 @@ function objectToString(o) {
 	return CryptoJS.SHA224;
 
 }));
-},{"./core":59,"./sha256":85}],85:[function(require,module,exports){
+},{"./core":61,"./sha256":87}],87:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -13913,7 +14540,7 @@ function objectToString(o) {
 	return CryptoJS.SHA256;
 
 }));
-},{"./core":59}],86:[function(require,module,exports){
+},{"./core":61}],88:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -14237,7 +14864,7 @@ function objectToString(o) {
 	return CryptoJS.SHA3;
 
 }));
-},{"./core":59,"./x64-core":90}],87:[function(require,module,exports){
+},{"./core":61,"./x64-core":92}],89:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -14321,7 +14948,7 @@ function objectToString(o) {
 	return CryptoJS.SHA384;
 
 }));
-},{"./core":59,"./sha512":88,"./x64-core":90}],88:[function(require,module,exports){
+},{"./core":61,"./sha512":90,"./x64-core":92}],90:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -14645,7 +15272,7 @@ function objectToString(o) {
 	return CryptoJS.SHA512;
 
 }));
-},{"./core":59,"./x64-core":90}],89:[function(require,module,exports){
+},{"./core":61,"./x64-core":92}],91:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -15416,7 +16043,7 @@ function objectToString(o) {
 	return CryptoJS.TripleDES;
 
 }));
-},{"./cipher-core":58,"./core":59,"./enc-base64":60,"./evpkdf":62,"./md5":67}],90:[function(require,module,exports){
+},{"./cipher-core":60,"./core":61,"./enc-base64":62,"./evpkdf":64,"./md5":69}],92:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -15721,7 +16348,7 @@ function objectToString(o) {
 	return CryptoJS;
 
 }));
-},{"./core":59}],91:[function(require,module,exports){
+},{"./core":61}],93:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -16246,7 +16873,7 @@ function functionBindPolyfill(context) {
   };
 }
 
-},{}],92:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 var http = require('http')
 var url = require('url')
 
@@ -16279,7 +16906,7 @@ function validateParams (params) {
   return params
 }
 
-},{"http":114,"url":121}],93:[function(require,module,exports){
+},{"http":116,"url":123}],95:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -16365,7 +16992,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],94:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -16390,7 +17017,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],95:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -16413,14 +17040,14 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],96:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],97:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 exports.endianness = function () { return 'LE' };
 
 exports.hostname = function () {
@@ -16471,7 +17098,7 @@ exports.homedir = function () {
 	return '/'
 };
 
-},{}],98:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -16520,7 +17147,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 
 }).call(this,require('_process'))
 
-},{"_process":99}],99:[function(require,module,exports){
+},{"_process":101}],101:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -16706,7 +17333,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],100:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -17244,7 +17871,7 @@ process.umask = function() { return 0; };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{}],101:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -17330,7 +17957,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],102:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -17417,13 +18044,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],103:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":101,"./encode":102}],104:[function(require,module,exports){
+},{"./decode":103,"./encode":104}],106:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -17555,7 +18182,7 @@ Duplex.prototype._destroy = function (err, cb) {
 
   pna.nextTick(cb, err);
 };
-},{"./_stream_readable":106,"./_stream_writable":108,"core-util-is":56,"inherits":94,"process-nextick-args":98}],105:[function(require,module,exports){
+},{"./_stream_readable":108,"./_stream_writable":110,"core-util-is":58,"inherits":96,"process-nextick-args":100}],107:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -17603,7 +18230,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":107,"core-util-is":56,"inherits":94}],106:[function(require,module,exports){
+},{"./_stream_transform":109,"core-util-is":58,"inherits":96}],108:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -18626,7 +19253,7 @@ function indexOf(xs, x) {
 }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"./_stream_duplex":104,"./internal/streams/BufferList":109,"./internal/streams/destroy":110,"./internal/streams/stream":111,"_process":99,"core-util-is":56,"events":91,"inherits":94,"isarray":96,"process-nextick-args":98,"safe-buffer":113,"string_decoder/":118,"util":51}],107:[function(require,module,exports){
+},{"./_stream_duplex":106,"./internal/streams/BufferList":111,"./internal/streams/destroy":112,"./internal/streams/stream":113,"_process":101,"core-util-is":58,"events":93,"inherits":96,"isarray":98,"process-nextick-args":100,"safe-buffer":115,"string_decoder/":120,"util":53}],109:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -18841,7 +19468,7 @@ function done(stream, er, data) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":104,"core-util-is":56,"inherits":94}],108:[function(require,module,exports){
+},{"./_stream_duplex":106,"core-util-is":58,"inherits":96}],110:[function(require,module,exports){
 (function (process,global,setImmediate){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -19532,7 +20159,7 @@ Writable.prototype._destroy = function (err, cb) {
 };
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
 
-},{"./_stream_duplex":104,"./internal/streams/destroy":110,"./internal/streams/stream":111,"_process":99,"core-util-is":56,"inherits":94,"process-nextick-args":98,"safe-buffer":113,"timers":119,"util-deprecate":124}],109:[function(require,module,exports){
+},{"./_stream_duplex":106,"./internal/streams/destroy":112,"./internal/streams/stream":113,"_process":101,"core-util-is":58,"inherits":96,"process-nextick-args":100,"safe-buffer":115,"timers":121,"util-deprecate":126}],111:[function(require,module,exports){
 'use strict';
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -19612,7 +20239,7 @@ if (util && util.inspect && util.inspect.custom) {
     return this.constructor.name + ' ' + obj;
   };
 }
-},{"safe-buffer":113,"util":51}],110:[function(require,module,exports){
+},{"safe-buffer":115,"util":53}],112:[function(require,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -19687,10 +20314,10 @@ module.exports = {
   destroy: destroy,
   undestroy: undestroy
 };
-},{"process-nextick-args":98}],111:[function(require,module,exports){
+},{"process-nextick-args":100}],113:[function(require,module,exports){
 module.exports = require('events').EventEmitter;
 
-},{"events":91}],112:[function(require,module,exports){
+},{"events":93}],114:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = exports;
 exports.Readable = exports;
@@ -19699,7 +20326,7 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":104,"./lib/_stream_passthrough.js":105,"./lib/_stream_readable.js":106,"./lib/_stream_transform.js":107,"./lib/_stream_writable.js":108}],113:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":106,"./lib/_stream_passthrough.js":107,"./lib/_stream_readable.js":108,"./lib/_stream_transform.js":109,"./lib/_stream_writable.js":110}],115:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
 var Buffer = buffer.Buffer
@@ -19763,7 +20390,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":53}],114:[function(require,module,exports){
+},{"buffer":55}],116:[function(require,module,exports){
 (function (global){
 var ClientRequest = require('./lib/request')
 var response = require('./lib/response')
@@ -19852,7 +20479,7 @@ http.METHODS = [
 ]
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"./lib/request":116,"./lib/response":117,"builtin-status-codes":54,"url":121,"xtend":131}],115:[function(require,module,exports){
+},{"./lib/request":118,"./lib/response":119,"builtin-status-codes":56,"url":123,"xtend":133}],117:[function(require,module,exports){
 (function (global){
 exports.fetch = isFunction(global.fetch) && isFunction(global.ReadableStream)
 
@@ -19930,7 +20557,7 @@ xhr = null // Help gc
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{}],116:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -20262,7 +20889,7 @@ var unsafeHeaders = [
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
 
-},{"./capability":115,"./response":117,"_process":99,"buffer":53,"inherits":94,"readable-stream":112,"to-arraybuffer":120}],117:[function(require,module,exports){
+},{"./capability":117,"./response":119,"_process":101,"buffer":55,"inherits":96,"readable-stream":114,"to-arraybuffer":122}],119:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -20491,7 +21118,7 @@ IncomingMessage.prototype._onXHRProgress = function () {
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
 
-},{"./capability":115,"_process":99,"buffer":53,"inherits":94,"readable-stream":112}],118:[function(require,module,exports){
+},{"./capability":117,"_process":101,"buffer":55,"inherits":96,"readable-stream":114}],120:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20788,7 +21415,7 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"safe-buffer":113}],119:[function(require,module,exports){
+},{"safe-buffer":115}],121:[function(require,module,exports){
 (function (setImmediate,clearImmediate){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -20868,7 +21495,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
 };
 }).call(this,require("timers").setImmediate,require("timers").clearImmediate)
 
-},{"process/browser.js":99,"timers":119}],120:[function(require,module,exports){
+},{"process/browser.js":101,"timers":121}],122:[function(require,module,exports){
 var Buffer = require('buffer').Buffer
 
 module.exports = function (buf) {
@@ -20897,7 +21524,7 @@ module.exports = function (buf) {
 	}
 }
 
-},{"buffer":53}],121:[function(require,module,exports){
+},{"buffer":55}],123:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -21631,7 +22258,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":122,"punycode":100,"querystring":103}],122:[function(require,module,exports){
+},{"./util":124,"punycode":102,"querystring":105}],124:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -21649,7 +22276,7 @@ module.exports = {
   }
 };
 
-},{}],123:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/utf8js v2.1.2 by @mathias */
 ;(function(root) {
@@ -21898,7 +22525,7 @@ module.exports = {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{}],124:[function(require,module,exports){
+},{}],126:[function(require,module,exports){
 (function (global){
 
 /**
@@ -21970,7 +22597,7 @@ function config (name) {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{}],125:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -22016,7 +22643,7 @@ var SyntaxError = /** @class */ (function (_super) {
 }(Error));
 exports.SyntaxError = SyntaxError;
 
-},{}],126:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -22026,7 +22653,7 @@ __export(require("./xml-http-request"));
 var xml_http_request_event_target_1 = require("./xml-http-request-event-target");
 exports.XMLHttpRequestEventTarget = xml_http_request_event_target_1.XMLHttpRequestEventTarget;
 
-},{"./xml-http-request":130,"./xml-http-request-event-target":128}],127:[function(require,module,exports){
+},{"./xml-http-request":132,"./xml-http-request-event-target":130}],129:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ProgressEvent = /** @class */ (function () {
@@ -22042,7 +22669,7 @@ var ProgressEvent = /** @class */ (function () {
 }());
 exports.ProgressEvent = ProgressEvent;
 
-},{}],128:[function(require,module,exports){
+},{}],130:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var XMLHttpRequestEventTarget = /** @class */ (function () {
@@ -22084,7 +22711,7 @@ var XMLHttpRequestEventTarget = /** @class */ (function () {
 }());
 exports.XMLHttpRequestEventTarget = XMLHttpRequestEventTarget;
 
-},{}],129:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -22166,7 +22793,7 @@ exports.XMLHttpRequestUpload = XMLHttpRequestUpload;
 
 }).call(this,require("buffer").Buffer)
 
-},{"./xml-http-request-event-target":128,"buffer":53}],130:[function(require,module,exports){
+},{"./xml-http-request-event-target":130,"buffer":55}],132:[function(require,module,exports){
 (function (process,Buffer){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -22617,7 +23244,7 @@ XMLHttpRequest.prototype.nodejsBaseUrl = null;
 
 }).call(this,require('_process'),require("buffer").Buffer)
 
-},{"./errors":125,"./progress-event":127,"./xml-http-request-event-target":128,"./xml-http-request-upload":129,"_process":99,"buffer":53,"cookiejar":55,"http":114,"https":92,"os":97,"url":121}],131:[function(require,module,exports){
+},{"./errors":127,"./progress-event":129,"./xml-http-request-event-target":130,"./xml-http-request-upload":131,"_process":101,"buffer":55,"cookiejar":57,"http":116,"https":94,"os":99,"url":123}],133:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -25323,7 +25950,7 @@ function extend() {
     }
 })(this);
 
-},{"crypto":52}],"web3":[function(require,module,exports){
+},{"crypto":54}],"web3":[function(require,module,exports){
 var Web3 = require('./lib/web3');
 
 // dont override global variable
