@@ -21,11 +21,15 @@ Implementing additional features that are not in quarkchain-web3.js but availabl
 * qkc3.qkc.sendTransaction()    [Server issues #178](https://github.com/QuarkChain/pyquarkchain/issues/178)
 * qkc3.qkc.call()               [Server issues #178](https://github.com/QuarkChain/pyquarkchain/issues/178)
 
-# Run demo 
+# Run demo on Docker
+
+You can build a docker image with all the dependencies installed using this [Dockerfile](https://github.com/vlzkonopatov/web3.js/blob/develop/Dockerfile) or download the image directly from docker cloud. 
 
 ```
-node ./example/node-app.js
+docker build -t quarkchain-qkc .
+docker run quarkchain-qkc
 ```
+
 Result: 
 ```
 init
@@ -46,6 +50,13 @@ null
 ----------------------------------------------------------------
 
 ```
+
+# Run demo 
+
+```
+node ./example/node-app.js
+```
+
 
 [Documentation](https://github.com/ethereum/wiki/wiki/JavaScript-API)
 
