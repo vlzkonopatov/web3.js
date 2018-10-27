@@ -11,9 +11,41 @@ Since the eth APIs only accept ETH address (20 bytes) while the QKC address is (
 Implementing additional features that are not in quarkchain-web3.js but available in web3.js will get bonus points.
 
 
-#Implemented methods
+# Implemented methods
 
+* qkc3.qkc.getBalance() 
+* qkc3.qkc.getTransactionCount()
+* qkc3.qkc.getCode()
+* qkc3.qkc.getTransactionReceipt 
+* qkc3.qkc.getAccountData()
+* qkc3.qkc.sendTransaction()    [Server issues #178](https://github.com/QuarkChain/pyquarkchain/issues/178)
+* qkc3.qkc.call()               [Server issues #178](https://github.com/QuarkChain/pyquarkchain/issues/178)
 
+# Run demo 
+
+```
+node ./example/node-app.js
+```
+Result: 
+```
+init
+HASH: 0x68fB978BF0e4c69bA338D4Fa5A4e5EAA88438AA819e189EC
+TRUE: true
+----------------------------------------------------------------
+balance:
+{ branch: '0x2c', shard: '0xc', balance: '0x0' }
+----------------------------------------------------------------
+getTransactionCount:
+0x0
+----------------------------------------------------------------
+getCode:
+0x
+----------------------------------------------------------------
+getTransactionReceipt:
+null
+----------------------------------------------------------------
+
+```
 
 [Documentation](https://github.com/ethereum/wiki/wiki/JavaScript-API)
 
