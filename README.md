@@ -23,7 +23,7 @@ Implementing additional features that are not in quarkchain-web3.js but availabl
 
 # Run demo on Docker
 
-You can build a docker image with all the dependencies installed using this [Dockerfile](https://github.com/vlzkonopatov/web3.js/blob/develop/Dockerfile) or download the image directly from docker cloud. 
+You can build a docker image with all the dependencies installed using this [Dockerfile](https://github.com/vlzkonopatov/web3.js/blob/develop/Dockerfile)
 
 ```
 docker build -t quarkchain-qkc .
